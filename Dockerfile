@@ -30,7 +30,7 @@ RUN curl -o /tmp/elastic.tgz $ELASTIC_URL \
     && ln -s elasticsearch-* elasticsearch \
     && echo 'network.host: 0.0.0.0' >>  /opt/elasticsearch/config/elasticsearch.yml \
     && echo 'server.host: "0.0.0.0"' >> /opt/kibana/config/kibana.yml
-RUN mkdir -p /opt/ssl /opt/logstash/config/conf.d \
+RUN mkdir -p /opt/ssl /opt/logstash/config/conf.d 
 
 ADD files/startup.sh /
 ADD files/*.conf /opt/logstash/config/conf.d/
