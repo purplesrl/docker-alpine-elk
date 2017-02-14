@@ -13,7 +13,8 @@ ENV KIBANA_URL   https://artifacts.elastic.co/downloads/kibana/kibana-$ELK_VERSI
 
 RUN apk update \
     && apk upgrade \
-    && apk add nano curl bash openssl libstdc++
+    && apk add nano curl bash openssl libstdc++ \
+    && sed -i 's/dev\/random/dev\/urandom/g' /usr/lib/jvm/jre/jre/lib/security/java.security
 
 USER elk
 WORKDIR /opt
@@ -29,9 +30,12 @@ RUN curl -o /tmp/elastic.tgz $ELASTIC_URL \
     && ln -s elasticsearch-* elasticsearch \
     && echo 'network.host: 0.0.0.0' >>  /opt/elasticsearch/config/elasticsearch.yml \
     && echo 'server.host: "0.0.0.0"' >> /opt/kibana/config/kibana.yml
+RUN mkdir -p /opt/ssl /opt/logstash/config/conf.d \
+    && openssl req -config /etc/ssl/openssl.cnf -subj '/CN=*/' -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout /opt/ssl/logstash-forwarder.key -out /opt/ssl/logstash-forwarder.crt
 
 ADD files/startup.sh /
+ADD files/*.conf /opt/logstash/config/conf.d/
 
-EXPOSE 9200 9300 5601 514 514/udp
+EXPOSE 9200 9300 5601 5044
 
 ENTRYPOINT "/startup.sh"
